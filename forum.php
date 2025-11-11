@@ -13,6 +13,19 @@ include ( 'includes/header.html' ) ;
 # Open database connection.
 require ( 'connect_db.php' ) ;
 
+# Display success message if post was just published
+if (isset($_SESSION['post_success'])) {
+  echo '<div class="container mt-4">';
+  echo '  <div class="alert alert-success alert-dismissible fade show" role="alert" aria-live="polite" aria-atomic="true">';
+  echo '    <i class="bi bi-check-circle-fill me-2" aria-hidden="true"></i>';
+  echo '    <strong>Success!</strong> ' . htmlspecialchars($_SESSION['post_success']);
+  echo '    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+  echo '  </div>';
+  echo '</div>';
+  # Clear the message so it doesn't display again
+  unset($_SESSION['post_success']);
+}
+
 # Display hero section with title and post button
 echo '<div class="hero-section text-center mb-4">
         <div class="container">
