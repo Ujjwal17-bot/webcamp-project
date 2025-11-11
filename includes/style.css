@@ -91,3 +91,23 @@ p#err_msg { color:#F00; font-weight:bold; }
 /* Added page success card */
 .success-card { max-width: 640px; margin: 3rem auto; }
 .success-icon { font-size: 3rem; color: #28a745; }
+
+/* Home page hover card effect */
+.hover-card {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.hover-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+}
+
+.feature-icon {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
