@@ -94,13 +94,12 @@ p#err_msg { color:#F00; font-weight:bold; }
 
 /* Home page hover card effect */
 .hover-card {
-  transition: all 0.3s ease;
-  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .hover-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+  transform: translateY(-4px);
+  box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.08) !important;
 }
 
 .feature-icon {
@@ -110,4 +109,18 @@ p#err_msg { color:#F00; font-weight:bold; }
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-10px); }
+}
+
+/* Hero section text clamping */
+.hero-section .lead {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (max-width: 576px) {
+  .hero-section .lead {
+    -webkit-line-clamp: 2;
+  }
 }
