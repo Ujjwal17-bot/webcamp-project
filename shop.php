@@ -19,26 +19,44 @@ $selected_category = isset($_GET['category']) ? trim($_GET['category']) : 'all';
 # Define valid categories
 $valid_categories = ['all', 'vegan', 'vegetarian', 'seafood', 'meat', 'dessert'];
 
-# Validate category parameter
-if (!in_array(strtolower($selected_category), $valid_categories)) {
+# Validate category parameter - ensure lowercase for database comparison
+$selected_category = strtolower($selected_category);
+if (!in_array($selected_category, $valid_categories)) {
   $selected_category = 'all';
 }
 
+# Check if the category column exists in the shop table
+$column_check = mysqli_query($dbc, "SHOW COLUMNS FROM shop LIKE 'category'");
+$category_column_exists = (mysqli_num_rows($column_check) > 0);
+
+# Variable to store any warnings
+$warning_message = '';
+
 # Retrieve items from 'shop' database table with category filter
-if ($selected_category === 'all') {
-  # Get all items
+if ($category_column_exists) {
+  # Category column exists - use filtering
+  if ($selected_category === 'all') {
+    # Get all items
+    $q = "SELECT * FROM shop ORDER BY item_id DESC";
+    $stmt = mysqli_prepare($dbc, $q);
+  } else {
+    # Filter by category using prepared statement
+    $q = "SELECT * FROM shop WHERE category = ? ORDER BY item_id DESC";
+    $stmt = mysqli_prepare($dbc, $q);
+    mysqli_stmt_bind_param($stmt, 's', $selected_category);
+  }
+  
+  # Execute query
+  mysqli_stmt_execute($stmt);
+  $r = mysqli_stmt_get_result($stmt);
+} else {
+  # Category column doesn't exist - show all items with warning
+  $warning_message = 'The category filter is not available yet. Please add the category column to the database.';
   $q = "SELECT * FROM shop ORDER BY item_id DESC";
   $stmt = mysqli_prepare($dbc, $q);
-} else {
-  # Filter by category using prepared statement
-  $q = "SELECT * FROM shop WHERE category = ? ORDER BY item_id DESC";
-  $stmt = mysqli_prepare($dbc, $q);
-  mysqli_stmt_bind_param($stmt, 's', $selected_category);
+  mysqli_stmt_execute($stmt);
+  $r = mysqli_stmt_get_result($stmt);
 }
-
-# Execute query
-mysqli_stmt_execute($stmt);
-$r = mysqli_stmt_get_result($stmt);
 
 # Hero header
 echo '<div class="container py-4">';
@@ -54,6 +72,24 @@ echo '      </div>';
 echo '    </div>';
 echo '  </div>';
 echo '</div>';
+
+# Display warning if category column doesn't exist
+if (!empty($warning_message)) {
+  echo '<div class="container py-3">';
+  echo '  <div class="alert alert-warning alert-dismissible fade show" role="alert">';
+  echo '    <div class="d-flex align-items-start">';
+  echo '      <i class="bi bi-exclamation-triangle-fill me-3 fs-5" aria-hidden="true"></i>';
+  echo '      <div>';
+  echo '        <strong>Category Filter Not Available</strong>';
+  echo '        <p class="mb-2">' . htmlspecialchars($warning_message) . '</p>';
+  echo '        <p class="mb-0"><small>Run this SQL command to enable category filtering:</small></p>';
+  echo '        <code class="d-block mt-2 p-2 bg-light rounded">ALTER TABLE shop ADD COLUMN category VARCHAR(32) NOT NULL DEFAULT \'meat\';</code>';
+  echo '      </div>';
+  echo '    </div>';
+  echo '    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+  echo '  </div>';
+  echo '</div>';
+}
 
 # Category filter pills
 echo '<div class="container py-3">';
@@ -91,7 +127,7 @@ echo '</div>';
 echo '<div class="container py-4">';
 
 # Display selected category info
-if ($selected_category !== 'all') {
+if ($selected_category !== 'all' && $category_column_exists) {
   $category_display = ucfirst(htmlspecialchars($selected_category));
   echo '  <div class="mb-3">';
   echo '    <h5 class="text-muted">Showing: <span class="text-primary">' . $category_display . '</span></h5>';
