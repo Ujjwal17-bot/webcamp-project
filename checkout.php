@@ -102,7 +102,11 @@ if ( isset( $_GET['total'] ) && ( $_GET['total'] > 0 ) && (!empty($_SESSION['car
     echo '          <p class="text-muted mb-3">No item details available for this order.</p>';
   }
 
-  echo '          <div class="d-flex justify-content-center gap-2 mt-3">';
+  # Print stylesheet and print button (print-only rules hide navigation/footer)
+  echo '<style>@media print{ .no-print{display:none!important;} .site-footer, .btn-close {display:none!important;} body{ -webkit-print-color-adjust:exact; color-adjust:exact;} .card{box-shadow:none!important;border:0!important;} }</style>';
+
+  echo '          <div class="d-flex justify-content-center gap-2 mt-3 no-print">';
+  echo '            <button type="button" onclick="window.print()" class="btn btn-outline-secondary">Print Receipt</button>';
   echo '            <a href="shop.php" class="btn btn-primary">Return to Shop</a>';
   echo '            <a href="home.php" class="btn btn-outline-secondary">Go to Home</a>';
   echo '          </div>';
