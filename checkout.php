@@ -54,29 +54,25 @@ if ( isset( $_GET['total'] ) && ( $_GET['total'] > 0 ) && (!empty($_SESSION['car
   # Close database connection.
   mysqli_close($dbc);
 
-  # Render confirmation card with order summary
+  # Render confirmation card with order summary (Bootstrap-styled)
   echo '<div class="container py-5">';
   echo '  <div class="row justify-content-center">';
   echo '    <div class="col-12 col-md-10 col-lg-8">';
-  echo '      <div class="card shadow-sm">';
-  echo '        <div class="card-body">';
-  echo '          <div class="d-flex align-items-center mb-3">';
-  echo '            <div class="me-3">';
-  echo '              <div class="success-icon display-6 text-success">&#10004;</div>';
-  echo '            </div>';
-  echo '            <div>';
-  echo '              <h3 class="mb-0">Order Placed Successfully!</h3>';
-  echo '              <p class="text-muted mb-0">Thank you for your purchase.</p>';
-  echo '            </div>';
+  echo '      <div class="card border-0 shadow-sm">';
+  echo '        <div class="card-body text-center">';
+  echo '          <div class="mb-3">';
+  echo '            <div class="display-4 text-success"><i class="bi bi-check-circle-fill" aria-hidden="true"></i></div>';
   echo '          </div>';
+  echo '          <h2 class="h4 fw-bold mb-1">Thank you for shopping with us!</h2>';
+  echo '          <p class="text-muted mb-3">Your order has been placed successfully.</p>';
 
-  echo '          <div class="alert alert-success my-3">';
-  echo '            <strong>Order Number:</strong> <span class="h5 ms-2">#' . htmlspecialchars($order_id) . '</span>';
+  echo '          <div class="mb-3">';
+  echo '            <span class="text-muted">Order Number:</span> <span class="h4 text-primary ms-2">#' . htmlspecialchars($order_id) . '</span>';
   echo '          </div>';
 
   if (!empty($purchased_items)) {
-    echo '          <div class="table-responsive">';
-    echo '            <table class="table table-borderless">';
+    echo '          <div class="table-responsive mb-3">';
+    echo '            <table class="table table-sm table-borderless mb-0">';
     echo '              <thead>'; 
     echo '                <tr class="text-muted small">';
     echo '                  <th>Item</th>'; 
@@ -103,12 +99,12 @@ if ( isset( $_GET['total'] ) && ( $_GET['total'] > 0 ) && (!empty($_SESSION['car
     echo '            </table>';
     echo '          </div>';
   } else {
-    echo '          <p class="text-muted">No item details available for this order.</p>';
+    echo '          <p class="text-muted mb-3">No item details available for this order.</p>';
   }
 
-  echo '          <div class="d-flex justify-content-center gap-2 mt-4">';
+  echo '          <div class="d-flex justify-content-center gap-2 mt-3">';
   echo '            <a href="shop.php" class="btn btn-primary">Return to Shop</a>';
-  echo '            <a href="home.php" class="btn btn-outline-secondary">Go Home</a>';
+  echo '            <a href="home.php" class="btn btn-outline-secondary">Go to Home</a>';
   echo '          </div>';
 
   echo '        </div>';
