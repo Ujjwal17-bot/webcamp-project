@@ -27,42 +27,97 @@ if ( isset( $_GET['total'] ) && ( $_GET['total'] > 0 ) && (!empty($_SESSION['car
   $r = mysqli_query ($dbc, $q);
 
   # Store order contents in 'order_contents' database table.
+  $purchased_items = array();
+  $total_amount = 0.0;
+
   while ($row = mysqli_fetch_array ($r, MYSQLI_ASSOC))
   {
-    $query = "INSERT INTO order_contents ( order_id, item_id, quantity, price )
-    VALUES ( $order_id, ".$row['item_id'].",".$_SESSION['cart'][$row['item_id']]['quantity'].",".$_SESSION['cart'][$row['item_id']]['price'].")" ;
+    $item_id = (int) $row['item_id'];
+    $qty = isset($_SESSION['cart'][$item_id]['quantity']) ? (int) $_SESSION['cart'][$item_id]['quantity'] : 1;
+    $price = isset($_SESSION['cart'][$item_id]['price']) ? floatval($_SESSION['cart'][$item_id]['price']) : floatval($row['item_price'] ?? 0);
+
+    # Keep existing insert logic for order_contents
+    $query = "INSERT INTO order_contents ( order_id, item_id, quantity, price ) VALUES ( $order_id, " . $item_id . "," . $qty . "," . $price . ")" ;
     $result = mysqli_query($dbc,$query);
+
+    # Collect item details for confirmation display
+    $line_total = $qty * $price;
+    $total_amount += $line_total;
+    $purchased_items[] = array(
+      'name' => $row['item_name'],
+      'quantity' => $qty,
+      'price' => $price,
+      'line_total' => $line_total
+    );
   }
-  
+
   # Close database connection.
   mysqli_close($dbc);
 
-  # Display success message with Bootstrap styling
+  # Render confirmation card with order summary
   echo '<div class="container py-5">';
   echo '  <div class="row justify-content-center">';
-  echo '    <div class="col-12 col-md-8 col-lg-6">';
-  echo '      <div class="card success-card text-center shadow-sm">';
+  echo '    <div class="col-12 col-md-10 col-lg-8">';
+  echo '      <div class="card shadow-sm">';
   echo '        <div class="card-body">';
-  echo '          <div class="mb-3">';
-  echo '            <div class="success-icon">&#10004;</div>';
+  echo '          <div class="d-flex align-items-center mb-3">';
+  echo '            <div class="me-3">';
+  echo '              <div class="success-icon display-6 text-success">&#10004;</div>';
+  echo '            </div>';
+  echo '            <div>';
+  echo '              <h3 class="mb-0">Order Placed Successfully!</h3>';
+  echo '              <p class="text-muted mb-0">Thank you for your purchase.</p>';
+  echo '            </div>';
   echo '          </div>';
-  echo '          <h3 class="card-title text-success mb-3">Order Placed Successfully!</h3>';
-  echo '          <p class="lead mb-3">Thank you for shopping with us!</p>';
-  echo '          <div class="alert alert-success mb-4">';
-  echo '            <strong>Your Order Number:</strong> <span class="h4">#' . htmlspecialchars($order_id) . '</span>';
+
+  echo '          <div class="alert alert-success my-3">';
+  echo '            <strong>Order Number:</strong> <span class="h5 ms-2">#' . htmlspecialchars($order_id) . '</span>';
   echo '          </div>';
-  echo '          <p class="text-muted mb-4">Your order has been placed successfully. We will process it shortly.</p>';
-  echo '          <div class="d-flex justify-content-center gap-2">';
+
+  if (!empty($purchased_items)) {
+    echo '          <div class="table-responsive">';
+    echo '            <table class="table table-borderless">';
+    echo '              <thead>'; 
+    echo '                <tr class="text-muted small">';
+    echo '                  <th>Item</th>'; 
+    echo '                  <th class="text-end">Qty</th>'; 
+    echo '                  <th class="text-end">Price</th>'; 
+    echo '                  <th class="text-end">Total</th>'; 
+    echo '                </tr>'; 
+    echo '              </thead>'; 
+    echo '              <tbody>';
+    foreach ($purchased_items as $pitem) {
+      echo '                <tr>'; 
+      echo '                  <td>' . htmlspecialchars($pitem['name']) . '</td>'; 
+      echo '                  <td class="text-end">' . (int)$pitem['quantity'] . '</td>'; 
+      echo '                  <td class="text-end">$' . number_format($pitem['price'], 2) . '</td>'; 
+      echo '                  <td class="text-end">$' . number_format($pitem['line_total'], 2) . '</td>'; 
+      echo '                </tr>';
+    }
+    echo '                <tr class="border-top">';
+    echo '                  <td></td><td></td>'; 
+    echo '                  <td class="text-end fw-semibold">Total</td>'; 
+    echo '                  <td class="text-end fw-bold">$' . number_format($total_amount, 2) . '</td>'; 
+    echo '                </tr>';
+    echo '              </tbody>';
+    echo '            </table>';
+    echo '          </div>';
+  } else {
+    echo '          <p class="text-muted">No item details available for this order.</p>';
+  }
+
+  echo '          <div class="d-flex justify-content-center gap-2 mt-4">';
   echo '            <a href="shop.php" class="btn btn-primary">Return to Shop</a>';
-  echo '            <a href="home.php" class="btn btn-outline-secondary">Go to Home</a>';
+  echo '            <a href="home.php" class="btn btn-outline-secondary">Go Home</a>';
   echo '          </div>';
+
   echo '        </div>';
   echo '      </div>';
   echo '    </div>';
   echo '  </div>';
   echo '</div>';
 
-  # Remove cart items.  
+  # Remove cart items.
   $_SESSION['cart'] = NULL ;
 }
 else
